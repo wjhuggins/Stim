@@ -124,7 +124,7 @@ def assign_Kcolor(n_i: int, n_j: int, n_k: int,
                 if ExistK[i][j][k]:
                     if ColorKM[i][j][k] > -1 and ColorKP[i][j][k] == -1:
                         ColorKP[i][j][k] = ColorKM[i][j][k]
-                        break
+                        return True
     # For K-pipes that have no color at both ends and connects a Y-cube
     for i in range(n_i):
         for j in range(n_j):
@@ -136,7 +136,20 @@ def assign_Kcolor(n_i: int, n_j: int, n_k: int,
                     if (in_bound(n_i, n_j, n_k, i, j, k + 1)
                             and NodeY[i][j][k + 1] and ColorKP[i][j][k] == -1):
                         ColorKP[i][j][k] = 0
-                        break
+                        return True
+
+    # Added to try to fix when nothing else does by just forcing a color...
+    for i in range(n_i):
+        for j in range(n_j):
+            for k in range(n_k):
+                if ExistK[i][j][k]:
+                    if ColorKM[i][j][k] == -1:
+                        ColorKM[i][j][k] = 0
+                        return True
+                    if ColorKP[i][j][k] == -1:
+                        ColorKP[i][j][k] = 0
+                        return True
+    return False
 
 
 def color_ports(ports: Sequence[Mapping[str, Union[str, int]]],
@@ -182,7 +195,8 @@ def color_kp_km(
     while if_uncolorK(n_i, n_j, n_k, ExistK, ColorKP, ColorKM):
         if not propogate_Kcolor(n_i, n_j, n_k, ExistK, ColorKP, ColorKM,
                                 NodeY):
-            assign_Kcolor(n_i, n_j, n_k, ExistK, ColorKP, ColorKM, NodeY)
+            if not assign_Kcolor(n_i, n_j, n_k, ExistK, ColorKP, ColorKM, NodeY):
+                raise ValueError("Cannot assign color to all K-pipes")
     return ColorKP, ColorKM
 
 
