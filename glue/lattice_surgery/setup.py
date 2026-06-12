@@ -20,6 +20,7 @@ setup(
     data_files=['README.md'],
     install_requires=[
         'z3-solver==4.12.1.0',
+        'setuptools<70',  # Required for z3-solver==4.12.1.0 compatibility (pkg_resources)
         'stim',
         'networkx',
         'ipykernel',
