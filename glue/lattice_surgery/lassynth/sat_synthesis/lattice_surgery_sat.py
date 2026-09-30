@@ -1639,10 +1639,12 @@ class LatticeSurgerySAT:
             print(f"CNF generation time: {time.time() - cnf_start_time}")
 
         with open(output_file_name, "w") as output_f:
-            output_f.write(cnf.dimacs())
+            output_f.write(dimacs)
+
         if dimacs.startswith("p cnf 1 1"):
-            print("Generated CNF is trivial meaning z3 concludes the instance"
-                  " UNSAT during simplification.")
+            if print_progress:
+                print("Generated CNF is trivial meaning z3 concludes the instance"
+                      " UNSAT during simplification.")
             return False
         else:
             return True
