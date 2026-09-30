@@ -77,11 +77,12 @@ def propogate_Kcolor(n_i: int, n_j: int, n_k: int,
         for j in range(n_j):
             for k in range(n_k):
                 if ExistK[i][j][k]:
-                    # consider propagate color from below
+                    # consider propagate color from below. Pipe k-1 and pipe k
+                    # meet at cube k; colour must not cross a Y cube there (a Y
+                    # cube with K-pipes on both sides is two separate Y-tails).
                     if in_bound(
                             n_i, n_j, n_k, i, j, k -
-                            1) and ExistK[i][j][k - 1] and NodeY[i][j][k -
-                                                                       1] == 0:
+                            1) and ExistK[i][j][k - 1] and NodeY[i][j][k] == 0:
                         if ColorKP[i][j][k -
                                          1] > -1 and ColorKM[i][j][k] == -1:
                             ColorKM[i][j][k] = ColorKP[i][j][k - 1]
