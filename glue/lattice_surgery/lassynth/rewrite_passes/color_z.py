@@ -114,9 +114,14 @@ def assign_Kcolor(n_i: int, n_j: int, n_k: int,
                   ExistK: Sequence[Sequence[Sequence[int]]],
                   ColorKP: Sequence[Sequence[Sequence[int]]],
                   ColorKM: Sequence[Sequence[Sequence[int]]],
-                  NodeY: Sequence[Sequence[Sequence[int]]]) -> None:
+                  NodeY: Sequence[Sequence[Sequence[int]]]) -> bool:
     """when no color can be deducted by propagating from other K-pipes, we
-    assign some color variables at will. Then, we can continue to propagate."""
+    assign some color variables at will. Then, we can continue to propagate.
+
+    Makes exactly one assignment and returns True, so that propagation runs
+    again before the next free choice. Returns False if no rule applies,
+    which cannot happen for a SAT solution (see color_z_test.py for the
+    argument)."""
 
     # assign a color by letting the two ends of a K-pipe to be the same
     for i in range(n_i):
@@ -126,29 +131,29 @@ def assign_Kcolor(n_i: int, n_j: int, n_k: int,
                     if ColorKM[i][j][k] > -1 and ColorKP[i][j][k] == -1:
                         ColorKP[i][j][k] = ColorKM[i][j][k]
                         return True
-    # For K-pipes that have no color at both ends and connects a Y-cube
+    # For K-pipes that have no color at both ends and connects a Y-cube.
+    # The color at a Y end is free up to a sign (H Y H = -Y); 0 is arbitrary.
     for i in range(n_i):
         for j in range(n_j):
             for k in range(n_k):
                 if ExistK[i][j][k]:
                     if NodeY[i][j][k] and ColorKM[i][j][k] == -1:
                         ColorKM[i][j][k] = 0
-                        break
+                        return True
                     if (in_bound(n_i, n_j, n_k, i, j, k + 1)
                             and NodeY[i][j][k + 1] and ColorKP[i][j][k] == -1):
                         ColorKP[i][j][k] = 0
                         return True
-
-    # Added to try to fix when nothing else does by just forcing a color...
+    # Only a dangling output port is left: a port pipe with e='+' whose inner
+    # cube touches no other pipe. The port fixes ColorKP and nothing fixes
+    # ColorKM. Copy it, so the pipe carries no Hadamard, as the first rule
+    # does for a dangling input port.
     for i in range(n_i):
         for j in range(n_j):
             for k in range(n_k):
                 if ExistK[i][j][k]:
-                    if ColorKM[i][j][k] == -1:
-                        ColorKM[i][j][k] = 0
-                        return True
-                    if ColorKP[i][j][k] == -1:
-                        ColorKP[i][j][k] = 0
+                    if ColorKP[i][j][k] > -1 and ColorKM[i][j][k] == -1:
+                        ColorKM[i][j][k] = ColorKP[i][j][k]
                         return True
     return False
 

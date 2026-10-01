@@ -658,7 +658,9 @@ class LatticeSurgerySAT:
         if self.color_ij:
             arrs += ["ColorI", "ColorJ"]
 
-        for s in range(self.n_s):
+        # Exist, Node, and Color vars are handled on the s == 0 pass. Make
+        # that pass even when there are no stabilizers (n_s == 0).
+        for s in range(max(self.n_s, 1)):
             for i in range(self.n_i):
                 for j in range(self.n_j):
                     for k in range(self.n_k):
@@ -669,6 +671,8 @@ class LatticeSurgerySAT:
                                         self.vars[arr][i][j][k]
                                         if data[arr][i][j][k] ==
                                         1 else z3.Not(self.vars[arr][i][j][k]))
+                        if s == self.n_s:  # n_s == 0: no Corr vars
+                            continue
                         # Corr vars
                         for arr in [
                                 "CorrIJ",
@@ -727,7 +731,7 @@ class LatticeSurgerySAT:
                     "ColorI",
                     "ColorJ",
             ]:
-                if len(data["indices"] != 3):
+                if len(data["indices"]) != 3:
                     raise ValueError(f"Need 3 indices for {data['array']}.")
                 if data["indices"][0] not in range(self.n_i):
                     raise ValueError(f"i index out of range")
@@ -744,7 +748,7 @@ class LatticeSurgerySAT:
                     "CorrKI",
                     "CorrKJ",
             ]:
-                if len(data["indices"] != 4):
+                if len(data["indices"]) != 4:
                     raise ValueError(f"Need 4 indices for {data['array']}.")
                 if data["indices"][0] not in range(self.n_s):
                     raise ValueError(f"s index out of range")
@@ -1821,7 +1825,9 @@ class LatticeSurgerySAT:
                 "ColorI",
                 "ColorJ",
             ]
-        for s in range(self.n_s):
+        # Exist, Node, and Color vars are read on the s == 0 pass. Make that
+        # pass even when there are no stabilizers (n_s == 0).
+        for s in range(max(self.n_s, 1)):
             for i in range(self.n_i):
                 for j in range(self.n_j):
                     for k in range(self.n_k):
@@ -1829,6 +1835,8 @@ class LatticeSurgerySAT:
                             for arr in arrs:
                                 data[arr][i][j][k] = (
                                     1 if model[self.vars[arr][i][j][k]] else 0)
+                        if s == self.n_s:  # n_s == 0: no Corr vars
+                            continue
 
                         # Corr vars
                         for arr in [
