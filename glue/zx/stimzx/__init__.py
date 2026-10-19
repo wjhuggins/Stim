@@ -1,3 +1,9 @@
+"""stimzx package initialization."""
+import sys
+
+_pkg = __name__
+sys.modules["stimzx"] = sys.modules[_pkg]
+
 __version__ = '1.17.dev0'
 from ._external_stabilizer import (
     ExternalStabilizer,
